@@ -1,0 +1,142 @@
+group = 'com.smarthane.android'
+version = "1.0.0"
+def apVersion = "1.0.0"
+
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.taobao.atlas'
+
+android {
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId "com.smarthane.android.atlas"
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        testInstrumentationRunner rootProject.ext.dependencies["androidJUnitRunner"]
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ moduleName : project.getName() ]
+            }
+        }
+
+    }
+    buildTypes {
+
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            buildConfigField "boolean", "USE_CANARY", "true"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            buildConfigField "boolean", "USE_CANARY", "false"
+            minifyEnabled true
+            shrinkResources true
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        disable "ResourceType"
+        abortOnError false
+    }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile(rootProject.ext.dependencies["cardview-v7"]) {
+        exclude module: 'support-annotations'
+    }
+    provided rootProject.ext.dependencies["javax.annotation"]
+    annotationProcessor rootProject.ext.dependencies["dagger2-compiler"]
+    compile rootProject.ext.dependencies["progressmanager"]
+    compile rootProject.ext.dependencies["retrofit-url-manager"]
+    annotationProcessor(rootProject.ext.dependencies["butterknife-compiler"]) {
+        exclude module: 'support-annotations'
+        exclude module: 'butterknife-annotations'
+    }
+    compile rootProject.ext.dependencies["arouter-api"]
+    annotationProcessor rootProject.ext.dependencies["arouter-compiler"]
+    compile rootProject.ext.dependencies["paginate"]
+    testCompile rootProject.ext.dependencies["junit"]
+    debugCompile rootProject.ext.dependencies["canary-debug"]
+    releaseCompile rootProject.ext.dependencies["canary-release"]
+    testCompile rootProject.ext.dependencies["canary-release"]
+    //mvparms
+    //compile project(':lib-mvparms')
+    compile rootProject.ext.dependencies["mvparms"]
+    //atlas的依赖
+    compile(rootProject.ext.dependencies["atlas-core"]) {
+        transitive = true
+    }
+    compile rootProject.ext.dependencies["atlas-update"]
+
+
+    // bundle
+    bundleCompile project(':bundle-test')
+    bundleCompile project(':bundle-remote')
+}
+
+//加入以下配置
+atlas {
+    atlasEnabled true
+
+    tBuildConfig {
+        autoStartBundles = ['com.smarthane.bundle.test'] //自启动bundle配置
+        outOfApkBundles = ['bundle-remote'] //远程module，列表来的，可填多个
+        preLaunch = 'com.smarthane.android.atlas.app.AtlasLaunch' //AppApplication启动之前调用
+    }
+
+    patchConfigs {
+        debug {
+            createTPatch true
+        }
+    }
+
+    buildTypes {
+        debug {
+//            if (apVersion) {
+//                // 打差异补丁 gradlew assembleDebug -DapVersion=1.1.0 -DversionName=1.1.1
+//                // 对应着本地maven仓库地址 .m2/repository/mmc/atlastest/AP-debug/1.1.4/AP-debug-1.1.4.ap
+//                baseApDependency "com.smarthane.android:AP-debug:${apVersion}@ap"
+//                patchConfig patchConfigs.debug
+//            }
+        }
+    }
+}
+
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact "${project.buildDir}/outputs/apk/${project.name}-debug.ap"
+            artifactId "AP-debug"
+        }
+    }
+}

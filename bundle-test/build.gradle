@@ -1,0 +1,64 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.taobao.atlas'
+
+atlas {
+    bundleConfig{
+        awbBundle true
+    }
+    buildTypes {
+        debug {
+            baseApFile project.rootProject.file('app/build/outputs/apk/app-debug.ap')
+        }
+    }
+}
+//只添加上面的配置就行了，下面的是默认生成的
+
+android {
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile rootProject.ext.dependencies["appcompat-v7"]
+    testCompile rootProject.ext.dependencies["junit"]
+
+}
+
+
+group = 'com.smarthane.android'
+version = '1.0.0'
+
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+publishing {
+    // 指定仓库位置
+    repositories {
+        mavenLocal()
+    }
+    publications {
+        // 默认本地仓库地址  用户目录/.m2/repository/
+        maven(MavenPublication) {
+            //读取ap目录上传maven
+            artifact "${project.buildDir}/outputs/awb/${project.name}-debug.awb"
+            //生成本地maven目录
+            //groupId group
+            artifactId "bundle_test"
+        }
+    }
+}
