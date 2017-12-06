@@ -42,4 +42,10 @@ dependencies {
         exclude module: 'rxjava'
         exclude module: 'reactive-streams'
     }
+    //greendao
+    compile rootProject.ext.dependencies["greenDAO"]
+    //view
+    compile rootProject.ext.dependencies["bottom-bar"]
+    compile rootProject.ext.dependencies["recyclerViewAdapterHelper"]
+    compile rootProject.ext.dependencies["cardswipelayout"]
 }

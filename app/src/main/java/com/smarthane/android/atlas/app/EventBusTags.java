@@ -6,4 +6,7 @@ package com.smarthane.android.atlas.app;
  */
 public interface EventBusTags {
 
+    String ACTIVITY_FRAGMENT_REPLACE = "ActivityFragmentReplace";
+    String EXTRA_DETAIL = "extra_detail";
+
 }

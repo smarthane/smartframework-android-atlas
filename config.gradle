@@ -19,7 +19,8 @@ ext {
             rxlifecycle2SdkVersion  : "2.1.0",
             espressoSdkVersion      : "2.2.2",
             canarySdkVersion        : "1.5.1",
-            mvparms                 : "2.2.0"
+            mvparms                 : "2.2.0",
+            greenDAO                : "3.2.2"
     ]
 
     dependencies = [
@@ -53,6 +54,9 @@ ext {
             "nineoldandroids"          : "com.nineoldandroids:library:2.4.0",
             "paginate"                 : "com.github.markomilos:paginate:0.5.1",
             "vlayout"                  : "com.alibaba.android:vlayout:1.1.0@aar",
+            "bottom-bar"               : "com.roughike:bottom-bar:2.3.1",//底部导航
+            "recyclerViewAdapterHelper": "com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.22",
+            "cardswipelayout"          : "me.yuqirong:cardswipelayout:1.0.0",//仿探探
 
             //rx1
             "rxandroid"                : "io.reactivex:rxandroid:1.2.1",
@@ -101,6 +105,7 @@ ext {
             "canary-release"           : "com.squareup.leakcanary:leakcanary-android-no-op:${version["canarySdkVersion"]}",
             "umeng-analytics"          : "com.umeng.analytics:analytics:6.0.1",
             "mvparms"                  : "me.jessyan:arms:${version["mvparms"]}",
+            "greenDAO"                  : "org.greenrobot:greendao:${version["greenDAO"]}",
 
             //atlas
             "atlas-core"               : "com.taobao.android:atlas_core:5.0.7.55@aar",

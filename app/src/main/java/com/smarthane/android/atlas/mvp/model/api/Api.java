@@ -5,6 +5,6 @@ package com.smarthane.android.atlas.mvp.model.api;
  * contact with jess.yan.effort@gmail.com
  */
 public interface Api {
-    String APP_DOMAIN = "https://api.github.com";
+    String APP_DOMAIN = "http://gank.io/";
     String RequestSuccess = "0";
 }

@@ -1,8 +1,10 @@
 package com.smarthane.android.atlas.mvp.model.entity;
 
-import java.io.Serializable;
 
 import com.smarthane.android.atlas.mvp.model.api.Api;
+
+import java.io.Serializable;
+
 
 /**
  * 如果你服务器返回的数据固定为这种方式(字段名可根据服务器更改)

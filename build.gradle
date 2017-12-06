@@ -21,6 +21,8 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         //Lambda
         classpath 'me.tatarka:gradle-retrolambda:3.6.0'
+        //greendDao
+        classpath 'org.greenrobot:greendao-gradle-plugin:3.2.2'
     }
 }
 allprojects {

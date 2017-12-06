@@ -4,7 +4,7 @@ import android.content.Context;
 import android.taobao.atlas.runtime.AtlasPreLauncher;
 
 /**
- * leeyh.lee@zkteco.com
+ * smarthane
  */
 public class AtlasLaunch implements AtlasPreLauncher {
     @Override

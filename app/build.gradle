@@ -4,6 +4,7 @@ def apVersion = "1.0.0"
 
 apply plugin: 'com.android.application'
 apply plugin: 'com.taobao.atlas'
+apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion rootProject.ext.android["compileSdkVersion"]
@@ -45,6 +46,12 @@ android {
         disable 'InvalidPackage'
         disable "ResourceType"
         abortOnError false
+    }
+
+    greendao {
+        schemaVersion 1//数据库版本号
+        daoPackage 'com.smarthane.android.atlas.app.greendao'//设置DaoMaster、DaoSession、Dao包名
+        targetGenDir 'src/main/java'//设置DaoMaster、DaoSession、Dao目录
     }
 }
 
