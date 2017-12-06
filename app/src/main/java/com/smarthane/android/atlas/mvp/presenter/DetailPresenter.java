@@ -58,7 +58,7 @@ public class DetailPresenter extends BasePresenter<DetailContract.Model, DetailC
                 .retryWhen(new RetryWithDelay(3, 2))
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
-                //.compose(RxUtils.bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
+                .compose(RxUtils.<GankEntity>bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
                 .subscribe(new ErrorHandleSubscriber<GankEntity>(mErrorHandler) {
                     @Override
                     public void onNext(@NonNull GankEntity gankEntity) {

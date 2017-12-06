@@ -11,6 +11,7 @@ import com.smarthane.android.atlas.app.utils.RxUtils;
 import com.smarthane.android.atlas.mvp.contract.CategoryContract;
 import com.smarthane.android.atlas.mvp.model.entity.GankEntity;
 import com.smarthane.android.atlas.mvp.ui.adapter.CategoryAdapter;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class CategoryPresenter extends BasePresenter<CategoryContract.Model, Cat
                             mRootView.endLoadMore();//隐藏下拉加载更多的进度条
                     }
                 })
-                //.compose(RxUtils.bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
+                .compose(RxUtils.<GankEntity>bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
                 .subscribe(new ErrorHandleSubscriber<GankEntity>(mErrorHandler) {
                     @Override
                     public void onNext(@NonNull GankEntity gankEntity) {

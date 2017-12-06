@@ -81,7 +81,7 @@ public class WelfarePresenter extends BasePresenter<WelfareContract.Model, Welfa
                             mRootView.endLoadMore();//隐藏下拉加载更多的进度条
                     }
                 })
-                //.compose(RxUtils.bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
+                .compose(RxUtils.<GankEntity>bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
                 .subscribe(new ErrorHandleSubscriber<GankEntity>(mErrorHandler) {
                     @Override
                     public void onNext(@NonNull GankEntity gankEntity) {
