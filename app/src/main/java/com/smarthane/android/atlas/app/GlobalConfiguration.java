@@ -11,11 +11,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.jess.arms.base.delegate.AppLifecycles;
+import com.jess.arms.di.module.AppModule;
+import com.jess.arms.di.module.ClientModule;
 import com.jess.arms.di.module.GlobalConfigModule;
 import com.jess.arms.http.GlobalHttpHandler;
 import com.jess.arms.http.RequestInterceptor;
@@ -37,12 +41,17 @@ import butterknife.ButterKnife;
 import com.smarthane.android.atlas.BuildConfig;
 import com.smarthane.android.atlas.R;
 import com.smarthane.android.atlas.mvp.model.api.Api;
+
+import io.rx_cache2.internal.RxCache;
 import me.jessyan.progressmanager.ProgressManager;
 import me.jessyan.retrofiturlmanager.RetrofitUrlManager;
+import me.jessyan.rxerrorhandler.handler.listener.ResponseErrorListener;
 import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.HttpException;
+import retrofit2.Retrofit;
 import timber.log.Timber;
 
 /**
@@ -112,42 +121,56 @@ public final class GlobalConfiguration implements ConfigModule {
                         return request;
                     }
                 })
-                .responseErrorListener((context1, t) -> {
-                    /* 用来提供处理所有错误的监听
+                .responseErrorListener(new ResponseErrorListener() {
+                    @Override
+                    public void handleResponseError(Context context1, Throwable t) {
+                        /* 用来提供处理所有错误的监听
                        rxjava必要要使用ErrorHandleSubscriber(默认实现Subscriber的onError方法),此监听才生效 */
-                    Timber.tag("Catch-Error").w(t.getMessage());
-                    //这里不光是只能打印错误,还可以根据不同的错误作出不同的逻辑处理
-                    String msg = "未知错误";
-                    if (t instanceof UnknownHostException) {
-                        msg = "网络不可用";
-                    } else if (t instanceof SocketTimeoutException) {
-                        msg = "请求网络超时";
-                    } else if (t instanceof HttpException) {
-                        HttpException httpException = (HttpException) t;
-                        msg = convertStatusCode(httpException);
-                    } else if (t instanceof JsonParseException || t instanceof ParseException || t instanceof JSONException || t instanceof JsonIOException) {
-                        msg = "数据解析错误";
+                        Timber.tag("Catch-Error").w(t.getMessage());
+                        //这里不光是只能打印错误,还可以根据不同的错误作出不同的逻辑处理
+                        String msg = "未知错误";
+                        if (t instanceof UnknownHostException) {
+                            msg = "网络不可用";
+                        } else if (t instanceof SocketTimeoutException) {
+                            msg = "请求网络超时";
+                        } else if (t instanceof HttpException) {
+                            HttpException httpException = (HttpException) t;
+                            msg = convertStatusCode(httpException);
+                        } else if (t instanceof JsonParseException || t instanceof ParseException || t instanceof JSONException || t instanceof JsonIOException) {
+                            msg = "数据解析错误";
+                        }
+                        ArmsUtils.snackbarText(msg);
                     }
-                    ArmsUtils.snackbarText(msg);
                 })
-                .gsonConfiguration((context1, gsonBuilder) -> {//这里可以自己自定义配置Gson的参数
-                    gsonBuilder
-                            .serializeNulls()//支持序列化null的参数
-                            .enableComplexMapKeySerialization();//支持将序列化key为object的map,默认只能序列化key为string的map
+                .gsonConfiguration(new AppModule.GsonConfiguration() {//这里可以自己自定义配置Gson的参数
+                    @Override
+                    public void configGson(Context context, GsonBuilder gsonBuilder) {
+                        gsonBuilder
+                                .serializeNulls()//支持序列化null的参数
+                                .enableComplexMapKeySerialization();//支持将序列化key为object的map,默认只能序列化key为string的map
+                    }
                 })
-                .retrofitConfiguration((context1, retrofitBuilder) -> {//这里可以自己自定义配置Retrofit的参数,甚至你可以替换系统配置好的okhttp对象
-                    // retrofitBuilder.addConverterFactory(FastJsonConverterFactory.create());//比如使用fastjson替代gson
+                .retrofitConfiguration(new ClientModule.RetrofitConfiguration() {
+                    @Override
+                    public void configRetrofit(Context context, Retrofit.Builder builder) {//这里可以自己自定义配置Retrofit的参数,甚至你可以替换系统配置好的okhttp对象
+                        // retrofitBuilder.addConverterFactory(FastJsonConverterFactory.create());//比如使用fastjson替代gson
+                    }
                 })
-                .okhttpConfiguration((context1, okhttpBuilder) -> {//这里可以自己自定义配置Okhttp的参数
-                    okhttpBuilder.writeTimeout(10, TimeUnit.SECONDS);
-                    //使用一行代码监听 Retrofit／Okhttp 上传下载进度监听,以及 Glide 加载进度监听. 详细使用请方法查看 https://github.com/JessYanCoding/ProgressManager
-                    ProgressManager.getInstance().with(okhttpBuilder);
-                    //让 Retrofit 同时支持多个 BaseUrl 以及动态改变 BaseUrl. 详细使用请方法查看 https://github.com/JessYanCoding/RetrofitUrlManager
-                    RetrofitUrlManager.getInstance().with(okhttpBuilder);
-
+                .okhttpConfiguration(new ClientModule.OkhttpConfiguration() {//这里可以自己自定义配置Okhttp的参数
+                    @Override
+                    public void configOkhttp(Context context, OkHttpClient.Builder okhttpBuilder) {
+                        okhttpBuilder.writeTimeout(10, TimeUnit.SECONDS);
+                        //使用一行代码监听 Retrofit／Okhttp 上传下载进度监听,以及 Glide 加载进度监听. 详细使用请方法查看 https://github.com/JessYanCoding/ProgressManager
+                        ProgressManager.getInstance().with(okhttpBuilder);
+                        //让 Retrofit 同时支持多个 BaseUrl 以及动态改变 BaseUrl. 详细使用请方法查看 https://github.com/JessYanCoding/RetrofitUrlManager
+                        RetrofitUrlManager.getInstance().with(okhttpBuilder);
+                    }
                 })
-                .rxCacheConfiguration((context1, rxCacheBuilder) -> {//这里可以自己自定义配置RxCache的参数
-                    rxCacheBuilder.useExpiredDataIfLoaderNotAvailable(true);
+                .rxCacheConfiguration(new ClientModule.RxCacheConfiguration() {
+                    @Override
+                    public void configRxCache(Context context, RxCache.Builder rxCacheBuilder) {//这里可以自己自定义配置RxCache的参数
+                        rxCacheBuilder.useExpiredDataIfLoaderNotAvailable(true);
+                    }
                 });
     }
 
@@ -198,7 +221,7 @@ public final class GlobalConfiguration implements ConfigModule {
             }
 
             @Override
-            public void onActivityStarted(Activity activity) {
+            public void onActivityStarted(final Activity activity) {
                 Timber.w(activity + " - onActivityStarted");
                 if (!activity.getIntent().getBooleanExtra("isInitToolbar", false)) {
                     //由于加强框架的兼容性,故将 setContentView 放到 onActivityCreated 之后,onActivityStarted 之前执行
@@ -220,8 +243,11 @@ public final class GlobalConfiguration implements ConfigModule {
                         ((TextView) activity.findViewById(R.id.toolbar_title)).setText(activity.getTitle());
                     }
                     if (activity.findViewById(R.id.toolbar_back) != null) {
-                        activity.findViewById(R.id.toolbar_back).setOnClickListener(v -> {
-                            activity.onBackPressed();
+                        activity.findViewById(R.id.toolbar_back).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                activity.onBackPressed();
+                            }
                         });
                     }
                 }

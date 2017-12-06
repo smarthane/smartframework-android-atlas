@@ -14,6 +14,8 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 import io.rx_cache2.DynamicKey;
 import io.rx_cache2.EvictDynamicKey;
+import io.rx_cache2.Reply;
+
 import com.smarthane.android.atlas.mvp.contract.UserContract;
 import com.smarthane.android.atlas.mvp.model.api.cache.CommonCache;
 import com.smarthane.android.atlas.mvp.model.api.service.UserService;
@@ -33,7 +35,7 @@ public class UserModel extends BaseModel implements UserContract.Model {
     }
 
     @Override
-    public Observable<List<User>> getUsers(int lastIdQueried, boolean update) {
+    public Observable<List<User>> getUsers(final int lastIdQueried,final boolean update) {
         //使用rxcache缓存,上拉刷新则不读取缓存,加载更多读取缓存
         return Observable.just(mRepositoryManager
                 .obtainRetrofitService(UserService.class)
@@ -45,7 +47,12 @@ public class UserModel extends BaseModel implements UserContract.Model {
                                 .getUsers(listObservable
                                         , new DynamicKey(lastIdQueried)
                                         , new EvictDynamicKey(update))
-                                .map(listReply -> listReply.getData());
+                                .map(new Function<Reply<List<User>>, List<User>>() {
+                                    @Override
+                                    public List<User> apply(Reply<List<User>> listReply) throws Exception {
+                                        return listReply.getData();
+                                    }
+                                });
                     }
                 });
 

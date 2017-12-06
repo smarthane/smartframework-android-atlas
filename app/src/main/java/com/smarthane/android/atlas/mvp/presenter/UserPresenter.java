@@ -7,6 +7,10 @@ import com.jess.arms.di.scope.ActivityScope;
 import com.jess.arms.integration.AppManager;
 import com.jess.arms.mvp.BasePresenter;
 import com.jess.arms.utils.PermissionUtil;
+import com.smarthane.android.atlas.app.utils.RxUtil;
+import com.smarthane.android.atlas.mvp.contract.UserContract;
+import com.smarthane.android.atlas.mvp.model.entity.User;
+import com.smarthane.android.atlas.mvp.ui.adapter.UserAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +18,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import com.smarthane.android.atlas.app.utils.RxUtils;
-import com.smarthane.android.atlas.mvp.contract.UserContract;
-import com.smarthane.android.atlas.mvp.model.entity.User;
-import com.smarthane.android.atlas.mvp.ui.adapter.UserAdapter;
 import me.jessyan.rxerrorhandler.core.RxErrorHandler;
 import me.jessyan.rxerrorhandler.handler.ErrorHandleSubscriber;
 import me.jessyan.rxerrorhandler.handler.RetryWithDelay;
@@ -82,20 +85,27 @@ public class UserPresenter extends BasePresenter<UserContract.Model, UserContrac
         mModel.getUsers(lastUserId, isEvictCache)
                 .subscribeOn(Schedulers.io())
                 .retryWhen(new RetryWithDelay(3, 2))//遇到错误时重试,第一个参数为重试几次,第二个参数为重试的间隔
-                .doOnSubscribe(disposable -> {
-                    if (pullToRefresh)
-                        mRootView.showLoading();//显示下拉刷新的进度条
-                    else
-                        mRootView.startLoadMore();//显示上拉加载更多的进度条
-                }).subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doFinally(() -> {
-                    if (pullToRefresh)
-                        mRootView.hideLoading();//隐藏下拉刷新的进度条
-                    else
-                        mRootView.endLoadMore();//隐藏上拉加载更多的进度条
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        if (pullToRefresh)
+                            mRootView.showLoading();//显示下拉刷新的进度条
+                        else
+                            mRootView.startLoadMore();//显示上拉加载更多的进度条
+                    }
                 })
-                .compose(RxUtils.bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doFinally(new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        if (pullToRefresh)
+                            mRootView.hideLoading();//隐藏下拉刷新的进度条
+                        else
+                            mRootView.endLoadMore();//隐藏上拉加载更多的进度条
+                    }
+                })
+                //.compose(RxUtil.bindToLifecycle(mRootView))//使用Rxlifecycle,使Disposable和Activity一起销毁
                 .subscribe(new ErrorHandleSubscriber<List<User>>(mErrorHandler) {
                     @Override
                     public void onNext(List<User> users) {

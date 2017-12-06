@@ -34,8 +34,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile rootProject.ext.dependencies["appcompat-v7"]
-    testCompile rootProject.ext.dependencies["junit"]
+    providedCompile project(':lib-core')
 
 }
 

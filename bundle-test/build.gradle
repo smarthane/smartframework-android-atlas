@@ -11,12 +11,10 @@ atlas {
         }
     }
 }
-//只添加上面的配置就行了，下面的是默认生成的
 
 android {
     compileSdkVersion rootProject.ext.android["compileSdkVersion"]
     buildToolsVersion rootProject.ext.android["buildToolsVersion"]
-
     defaultConfig {
         minSdkVersion rootProject.ext.android["minSdkVersion"]
         targetSdkVersion rootProject.ext.android["targetSdkVersion"]
@@ -34,18 +32,13 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile rootProject.ext.dependencies["appcompat-v7"]
-    testCompile rootProject.ext.dependencies["junit"]
-
+    providedCompile project(':lib-core')
 }
-
 
 group = 'com.smarthane.android'
 version = '1.0.0'
-
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-
 publishing {
     // 指定仓库位置
     repositories {

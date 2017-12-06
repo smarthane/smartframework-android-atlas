@@ -12,6 +12,8 @@ import com.jess.arms.utils.ArmsUtils;
 
 import butterknife.BindView;
 import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+
 import com.smarthane.android.atlas.R;
 import com.smarthane.android.atlas.mvp.model.entity.User;
 
@@ -38,7 +40,12 @@ public class UserItemHolder extends BaseHolder<User> {
     @Override
     public void setData(User data, int position) {
         Observable.just(data.getLogin())
-                .subscribe(s -> mName.setText(s));
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String s) throws Exception {
+                        mName.setText(s);
+                    }
+                });
 
         mImageLoader.loadImage(mAppComponent.appManager().getCurrentActivity() == null
                         ? mAppComponent.application() : mAppComponent.appManager().getCurrentActivity(),

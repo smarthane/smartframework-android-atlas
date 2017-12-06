@@ -1,1 +1,1 @@
-include ':app', ':lib-mvparms', ':bundle-test', ':bundle-remote'
+include ':app', ':lib-mvparms', ':bundle-test', ':bundle-remote', ':lib-core'
